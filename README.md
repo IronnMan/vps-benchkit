@@ -2,7 +2,21 @@
 
 VPS 综合性能与网络测试菜单脚本：在 **CentOS 7+ / Debian 9+ / Ubuntu 16.04+** 上一键安装依赖并调用多款测速/基准脚本。默认**优先使用仓库内已固定的脚本**，降低运行期拉取未知代码的风险。
 
-## 使用方法
+## 使用方法（推荐：克隆完整仓库）
+
+本仓库包含 `ZBench-CN.sh`、`vendor/zbench/`、`vendor/remote/` 等依赖，**不能只下载单个 `.sh` 再执行**。从 GitHub 拉取**整个仓库**后再运行主脚本：
+
+```bash
+# 将 OWNER 换成你的 GitHub 用户名或组织名
+git clone --depth 1 https://github.com/OWNER/vps-benchkit.git
+cd vps-benchkit
+chmod +x vps-benchkit.sh
+sudo ./vps-benchkit.sh
+```
+
+若已安装 [GitHub CLI](https://cli.github.com/) 且仓库在你名下，也可：`gh repo clone OWNER/vps-benchkit`。
+
+**已在本地克隆过仓库时**，在仓库根目录执行：
 
 ```bash
 chmod +x vps-benchkit.sh
