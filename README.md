@@ -32,6 +32,7 @@ sudo ./vps-benchkit.sh
 | `ZBENCH_UPLOAD=1` | （选项 2）允许向 zbench 云端 **HTTP 明文**上传测评数据并生成在线链接。默认**不上传**。 |
 | `ZBENCH_HTTP_REPORT=1` | （选项 2）结束后询问是否启动**仅监听 127.0.0.1** 的临时 HTTP 预览（需 `python3`），建议配合 SSH 端口转发访问。默认**不启用**临时 HTTP。 |
 | `ZBENCH_WGET_INSECURE=1` | （选项 2）`wget` 下载依赖时使用 `--no-check-certificate`。默认使用标准 TLS 校验。 |
+| `ZBENCH_PROVIDER=名称` | （选项 2）预先填写「服务器提供商」标签，**跳过**该项交互；留空则 `ZBENCH_PROVIDER=`。与是否上传 zbench 无关；不设则脚本会提示（可回车留空）。 |
 
 示例：
 

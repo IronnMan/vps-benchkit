@@ -71,12 +71,60 @@ checkwget() {
 	fi
 }
 
+# Ookla CLI：原 Bintray 已关停，改为官方 CDN；若系统已装 speedtest 则优先复用。
 checkspeedtest() {
-	if  [ ! -e './speedtest-cli/speedtest' ]; then
-		echo "正在安装 Speedtest-cli"
-		wget --no-check-certificate -qO speedtest.tgz https://bintray.com/ookla/download/download_file?file_path=ookla-speedtest-1.0.0-$(uname -m)-linux.tgz > /dev/null 2>&1
+	local _st="./speedtest-cli/speedtest"
+	if [[ -x "$_st" ]]; then
+		return 0
 	fi
-	mkdir -p speedtest-cli && tar zxvf speedtest.tgz -C ./speedtest-cli/ > /dev/null 2>&1 && chmod a+rx ./speedtest-cli/speedtest
+	if command -v speedtest >/dev/null 2>&1; then
+		echo "使用系统 PATH 中的 speedtest"
+		mkdir -p speedtest-cli
+		ln -sf "$(command -v speedtest)" "$_st"
+		chmod a+rx "$_st" 2>/dev/null || true
+		return 0
+	fi
+	local arch
+	case "$(uname -m)" in
+		x86_64|amd64) arch="x86_64" ;;
+		aarch64|arm64) arch="aarch64" ;;
+		*)
+			echo -e "${RED}不支持的架构: $(uname -m)。请从 https://www.speedtest.net/apps/cli 手动安装 CLI。${PLAIN}"
+			exit 1
+			;;
+	esac
+	local ver="1.2.0"
+	local url="https://install.speedtest.net/app/cli/ookla-speedtest-${ver}-linux-${arch}.tgz"
+	echo "正在下载 Ookla Speedtest CLI (${ver}, ${arch})..."
+	rm -f speedtest.tgz
+	if ! wget -qO speedtest.tgz "$url" 2>/dev/null; then
+		if ! curl -fsSL -o speedtest.tgz "$url" 2>/dev/null; then
+			echo -e "${RED}下载失败。请安装 wget/curl，或通过 packagecloud 安装 ookla speedtest 后重试。${PLAIN}"
+			exit 1
+		fi
+	fi
+	if [[ ! -s speedtest.tgz ]]; then
+		echo -e "${RED}下载文件为空${PLAIN}"
+		exit 1
+	fi
+	rm -rf speedtest-cli
+	mkdir -p speedtest-cli
+	if ! tar zxf speedtest.tgz -C ./speedtest-cli/ >/dev/null 2>&1; then
+		echo -e "${RED}解压 speedtest.tgz 失败${PLAIN}"
+		exit 1
+	fi
+	if [[ ! -x "$_st" ]]; then
+		local found
+		found=$(find ./speedtest-cli -maxdepth 4 -type f -name speedtest 2>/dev/null | head -1)
+		if [[ -n "$found" && -f "$found" ]]; then
+			cp -f "$found" "$_st"
+		fi
+	fi
+	if [[ ! -x "$_st" ]]; then
+		echo -e "${RED}未得到可执行的 speedtest。请从 https://www.speedtest.net/apps/cli 手动安装。${PLAIN}"
+		exit 1
+	fi
+	chmod a+rx "$_st"
 }
 
 speed_test(){

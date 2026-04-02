@@ -8,6 +8,7 @@
 #   ZBENCH_UPLOAD=1          允许向 zbench 云端上传测评数据（默认不上传）
 #   ZBENCH_HTTP_REPORT=1     结束后询问是否启动临时 HTTP 查看报告（默认不启用）
 #   ZBENCH_WGET_INSECURE=1   wget 下载依赖时使用 --no-check-certificate（不推荐）
+#   ZBENCH_PROVIDER=名称     预先填写「服务器提供商」，跳过下述交互提示（可为空: ZBENCH_PROVIDER=）
 #
 _ZB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ZB_VENDOR="${_ZB_SCRIPT_DIR}/vendor/zbench"
@@ -28,7 +29,16 @@ if  [ ! -e '/usr/bin/wget' ]; then
     echo "Error: wget command not found. You must be install wget command at first."
     exit 1
 fi
-read -p "请输入你的服务器提供商: " Provider
+# 「服务器提供商」= 你购买本 VPS 的主机商/云厂商名称（如 Vultr、阿里云），仅作测评记录标签。
+# **非必填**：可直接回车留空，不影响后续测评；仅 ZBENCH_UPLOAD=1 上传 zbench 时作为标签一并提交。
+# 已设置 ZBENCH_PROVIDER 时不再询问（无人值守可用）。
+if [[ -n "${ZBENCH_PROVIDER+x}" ]]; then
+    Provider="$ZBENCH_PROVIDER"
+    echo "已使用环境变量 ZBENCH_PROVIDER（未设置 ZBENCH_UPLOAD 时留空亦可）。"
+else
+    echo "说明: 下一项为 VPS 提供商名称(云厂商或经销商,非系统服务名)。非必填,可直接回车跳过。"
+    read -p "请输入你的服务器提供商(可留空): " Provider
+fi
 
 
 # Get IP
